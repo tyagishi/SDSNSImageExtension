@@ -9,6 +9,17 @@ import Foundation
 import AppKit
 
 extension NSImage {
+    // pos is location in new Image
+    public func unscaledCropWithString(_ cropRect: CGRect, _ attrStr: NSAttributedString, _ pos: NSPoint) -> NSImage {
+        let newImage = NSImage(size:cropRect.size)
+        let bitmapRep = newImage.unscaledBitmapImageRep(cropRect.size) {
+            self.draw(at: .zero, from: cropRect, operation: .copy, fraction: 1.0)
+            attrStr.draw(at: pos)
+        }
+        newImage.addRepresentation(bitmapRep)
+        return newImage
+    }
+
     public func unscaledCopy() -> NSImage {
         let newImage = NSImage(size: self.getSizeFromRepresentations())
         let bitmapRep = newImage.unscaledBitmapImageRep(self.getSizeFromRepresentations()) {
