@@ -9,9 +9,21 @@ import Foundation
 import AppKit
 
 extension NSImage {
-    public func copyWithUnscaledRepResolution() -> NSImage {
+    public func unscaledCopy() -> NSImage {
         let newImage = NSImage(size: self.getSizeFromRepresentations())
-        let bitmapRep = self.unscaledBitmapImageRep()
+        let bitmapRep = newImage.unscaledBitmapImageRep(self.getSizeFromRepresentations()) {
+            self.draw(at: .zero, from: .zero, operation: .copy, fraction: 1.0)
+        }
+        newImage.addRepresentation(bitmapRep)
+        return newImage
+    }
+    
+    // rect should align with getSizeFromRepresentations
+    public func unscaledCrop(_ rect: CGRect) -> NSImage {
+        let newImage = NSImage(size:rect.size)
+        let bitmapRep = newImage.unscaledBitmapImageRep(rect.size) {
+            self.draw(at: .zero, from: rect, operation: .copy, fraction: 1.0)
+        }
         newImage.addRepresentation(bitmapRep)
         return newImage
     }
@@ -26,18 +38,17 @@ extension NSImage {
         return CGSize(width: width, height: height)
     }
     
-    public func unscaledBitmapImageRep() -> NSBitmapImageRep {
-        let imagePixelSize = self.getSizeFromRepresentations()
-        guard let bitmapRep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(imagePixelSize.width), pixelsHigh: Int(imagePixelSize.height),
+    public func unscaledBitmapImageRep(_ targetSize:CGSize, drawHandler: @escaping () -> () ) -> NSBitmapImageRep {
+        guard let bitmapRep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(targetSize.width), pixelsHigh: Int(targetSize.height),
                                          bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
                                          colorSpaceName: .calibratedRGB, bytesPerRow: 0, bitsPerPixel: 0) else {
             preconditionFailure()
         }
-        bitmapRep.size = imagePixelSize
+        bitmapRep.size = targetSize
         
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: bitmapRep)
-        self.draw(at: .zero, from: .zero, operation: .copy, fraction: 1.0)
+        drawHandler()
         NSGraphicsContext.restoreGraphicsState()
         return bitmapRep;
     }
