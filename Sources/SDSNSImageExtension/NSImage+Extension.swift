@@ -78,9 +78,9 @@ extension NSImage {
         let cgImageDestination = CGImageDestinationCreateWithData(destData as CFMutableData, kUTTypeJPEG, 1, nil)!
 
         // test dic
-        var testDic = Dictionary<String,Any>()
-        testDic[kCGImagePropertyExifAuxSerialNumber as String] = NSNumber(2828)
-//        CGImageDestinationSetProperties(cgImageDestination, testDic as CFDictionary)
+        //var testDic = Dictionary<String,Any>()
+        //testDic[kCGImagePropertyExifAuxSerialNumber as String] = NSNumber(2828)
+        //CGImageDestinationSetProperties(cgImageDestination, testDic as CFDictionary)
 
         let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil)!
         //var dic = sourceProps as? Dictionary<String,Any>
@@ -89,19 +89,20 @@ extension NSImage {
             // always NSImage has .up
             dic![kCGImagePropertyOrientation as String] = CGImagePropertyOrientation.up
             
-            if var exif = dic![kCGImagePropertyExifDictionary as String] as? Dictionary<String,Any> {
-                
-                exif[kCGImagePropertyExifUserComment as String] = "Hello from ExifClip"
+            //if var exif = dic![kCGImagePropertyExifDictionary as String] as? Dictionary<String,Any> {
+                //exif[kCGImagePropertyExifUserComment as String] = "Hello from ExifClip"
                 //exif[kCGImagePropertyExifPixelXDimension as String] = NSNumber(333)
-                print("exit exists!")
-//                //print(dic![kCGImagePropertyExifPixelXDimension as String] as? NSNumber )
-//                //dic![kCGImagePropertyExifAuxSerialNumber as String] = NSNumber(2929)
-//                //dic![kCGImagePropertyExifPixelXDimension as String] = NSNumber(300)
+                //print("exit exists!")
+                //print(dic![kCGImagePropertyExifPixelXDimension as String] as? NSNumber )
+                //dic![kCGImagePropertyExifAuxSerialNumber as String] = NSNumber(2929)
+                //dic![kCGImagePropertyExifPixelXDimension as String] = NSNumber(300)
                 // need to copy-back to original dictionary
-                dic![kCGImagePropertyExifDictionary as String] = exif
-            }
+                //dic![kCGImagePropertyExifDictionary as String] = exif
+            //}
 //            dic[kCGImagePropertyOrientation as String] = CGImagePropertyOrientation.up
         }
+        
+        // note: pixel size info in metadata will be maintained automatically
         //let check = dic[kCGImagePropertyOrientation]
         CGImageDestinationAddImage(cgImageDestination, cgImage, dic! as CFDictionary)
         //CGImageDestinationSetProperties(cgImageDestination, dic! as CFDictionary)
