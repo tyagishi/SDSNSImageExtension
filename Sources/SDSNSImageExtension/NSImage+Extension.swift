@@ -66,7 +66,7 @@ extension NSImage {
 }
 
 extension NSImage {
-    public func jpegDataWithMetadata(_ image: NSImage, _ imageURL: URL) -> Data?{
+    public func jpegDataWithMetadata(_ imageURL: URL) -> Data?{
         // copy source property
         guard let cgImageSource = CGImageSourceCreateWithURL(imageURL as CFURL, nil) else { print("failed to create")
             return nil
@@ -82,9 +82,7 @@ extension NSImage {
         testDic[kCGImagePropertyExifAuxSerialNumber as String] = NSNumber(2828)
 //        CGImageDestinationSetProperties(cgImageDestination, testDic as CFDictionary)
 
-        var rect = CGRect(x: 50, y: 50, width: 200, height: 200)
-        let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil)!
-        let writeCGImage = cgImage.cropping(to: rect)!
+        let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil)!
         //var dic = sourceProps as? Dictionary<String,Any>
         var dic = sourceProps as? Dictionary<String,Any>
         if dic != nil {
@@ -105,7 +103,7 @@ extension NSImage {
 //            dic[kCGImagePropertyOrientation as String] = CGImagePropertyOrientation.up
         }
         //let check = dic[kCGImagePropertyOrientation]
-        CGImageDestinationAddImage(cgImageDestination, writeCGImage, dic! as CFDictionary)
+        CGImageDestinationAddImage(cgImageDestination, cgImage, dic! as CFDictionary)
         //CGImageDestinationSetProperties(cgImageDestination, dic! as CFDictionary)
         
         //print(sourceProps)
