@@ -66,50 +66,38 @@ extension NSImage {
 }
 
 extension NSImage {
-    public func jpegDataWithMetadata(_ imageURL: URL) -> Data?{
+    public func imageDataWithMetadata(_ imageURL:URL, type: CFString ) -> Data?{
+        // only jpeg, png is supported at the moment
+        guard type == kUTTypeJPEG || type == kUTTypePNG else { return nil }
+        
         // copy source property
         guard let cgImageSource = CGImageSourceCreateWithURL(imageURL as CFURL, nil) else { print("failed to create")
             return nil
         }
-        // let props = CGImageSourceCopyProperties(cgImageSource, nil) // NG: failed to get
         let sourceProps = CGImageSourceCopyPropertiesAtIndex(cgImageSource, 0, nil)
 
         let destData = NSMutableData()
-        let cgImageDestination = CGImageDestinationCreateWithData(destData as CFMutableData, kUTTypeJPEG, 1, nil)!
-
-        // test dic
-        //var testDic = Dictionary<String,Any>()
-        //testDic[kCGImagePropertyExifAuxSerialNumber as String] = NSNumber(2828)
-        //CGImageDestinationSetProperties(cgImageDestination, testDic as CFDictionary)
+        let cgImageDestination = CGImageDestinationCreateWithData(destData as CFMutableData, type, 1, nil)!
 
         let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil)!
-        //var dic = sourceProps as? Dictionary<String,Any>
         var dic = sourceProps as? Dictionary<String,Any>
         if dic != nil {
             // always NSImage has .up
             dic![kCGImagePropertyOrientation as String] = CGImagePropertyOrientation.up
-            
-            //if var exif = dic![kCGImagePropertyExifDictionary as String] as? Dictionary<String,Any> {
-                //exif[kCGImagePropertyExifUserComment as String] = "Hello from ExifClip"
-                //exif[kCGImagePropertyExifPixelXDimension as String] = NSNumber(333)
-                //print("exit exists!")
-                //print(dic![kCGImagePropertyExifPixelXDimension as String] as? NSNumber )
-                //dic![kCGImagePropertyExifAuxSerialNumber as String] = NSNumber(2929)
-                //dic![kCGImagePropertyExifPixelXDimension as String] = NSNumber(300)
-                // need to copy-back to original dictionary
-                //dic![kCGImagePropertyExifDictionary as String] = exif
-            //}
-//            dic[kCGImagePropertyOrientation as String] = CGImagePropertyOrientation.up
         }
         
         // note: pixel size info in metadata will be maintained automatically
-        //let check = dic[kCGImagePropertyOrientation]
         CGImageDestinationAddImage(cgImageDestination, cgImage, dic! as CFDictionary)
-        //CGImageDestinationSetProperties(cgImageDestination, dic! as CFDictionary)
-        
-        //print(sourceProps)
         CGImageDestinationFinalize(cgImageDestination)
         
         return destData as Data
+    }
+    
+    public func jpegDataWithMetadata(_ imageURL: URL) -> Data?{
+        return imageDataWithMetadata(imageURL, type: kUTTypeJPEG)
+    }
+    
+    public func pngDataWithMetadata(_ imageURL: URL) -> Data? {
+        return imageDataWithMetadata(imageURL, type: kUTTypePNG)
     }
 }
