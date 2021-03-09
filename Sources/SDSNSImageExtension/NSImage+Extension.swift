@@ -7,6 +7,7 @@
 
 import Foundation
 import AppKit
+import AVFoundation
 
 extension NSImage {
     // pos is location in new Image
@@ -68,7 +69,7 @@ extension NSImage {
 extension NSImage {
     public func imageDataWithMetadata(_ imageURL:URL, type: CFString ) -> Data?{
         // only jpeg, png is supported at the moment
-        guard type == kUTTypeJPEG || type == kUTTypePNG else { return nil }
+        guard type == kUTTypeJPEG || type == kUTTypePNG || ( type == AVFileType.heic as CFString ) else { return nil }
         
         // copy source property
         guard let cgImageSource = CGImageSourceCreateWithURL(imageURL as CFURL, nil) else { print("failed to create")
@@ -76,18 +77,25 @@ extension NSImage {
         }
         let sourceProps = CGImageSourceCopyPropertiesAtIndex(cgImageSource, 0, nil)
 
-        let destData = NSMutableData()
+//        let destData = NSMutableData()
+        let destData = CFDataCreateMutable(nil, 0)!
         let cgImageDestination = CGImageDestinationCreateWithData(destData as CFMutableData, type, 1, nil)!
 
         let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil)!
-        var dic = sourceProps as? Dictionary<String,Any>
-        if dic != nil {
-            // always NSImage has .up
-            dic![kCGImagePropertyOrientation as String] = CGImagePropertyOrientation.up
+
+        guard var dic = sourceProps as? Dictionary<String,Any> else { return nil }
+
+        // always NSImage has .up
+        dic[kCGImagePropertyOrientation as String] = CGImagePropertyOrientation.up
+        if type == kUTTypeJPEG {
+            dic[kCGImageDestinationLossyCompressionQuality as String] = 0.9
+        } else if type == kUTTypePNG {
+            
+        } else if type == AVFileType.heic as CFString {
+            dic[kCGImageDestinationLossyCompressionQuality as String] = 0.9
         }
-        
         // note: pixel size info in metadata will be maintained automatically
-        CGImageDestinationAddImage(cgImageDestination, cgImage, dic! as CFDictionary)
+        CGImageDestinationAddImage(cgImageDestination, cgImage, dic as CFDictionary)
         CGImageDestinationFinalize(cgImageDestination)
         
         return destData as Data
@@ -100,4 +108,9 @@ extension NSImage {
     public func pngDataWithMetadata(_ imageURL: URL) -> Data? {
         return imageDataWithMetadata(imageURL, type: kUTTypePNG)
     }
+
+    public func heicDataWithMetadata(_ imageURL: URL) -> Data?{
+        return imageDataWithMetadata(imageURL, type: AVFileType.heic as CFString)
+    }
+
 }
