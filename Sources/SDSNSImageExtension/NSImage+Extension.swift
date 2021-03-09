@@ -77,8 +77,7 @@ extension NSImage {
         }
         let sourceProps = CGImageSourceCopyPropertiesAtIndex(cgImageSource, 0, nil)
 
-//        let destData = NSMutableData()
-        let destData = CFDataCreateMutable(nil, 0)!
+        let destData = NSMutableData()
         let cgImageDestination = CGImageDestinationCreateWithData(destData as CFMutableData, type, 1, nil)!
 
         let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil)!
@@ -109,8 +108,8 @@ extension NSImage {
         return imageDataWithMetadata(imageURL, type: kUTTypePNG)
     }
 
-    public func heicDataWithMetadata(_ imageURL: URL) -> Data?{
-        return imageDataWithMetadata(imageURL, type: AVFileType.heic as CFString)
+    public func heicDataWithMetadata(_ imageURL: URL,_ compressionValue:Double = 0.9) -> Data?{
+        return imageDataWithMetadata(imageURL, type: AVFileType.heic as CFString, compressionValue)
     }
 
 }
