@@ -67,7 +67,7 @@ extension NSImage {
 }
 
 extension NSImage {
-    public func imageDataWithMetadata(_ imageURL:URL, type: CFString ) -> Data?{
+    public func imageDataWithMetadata(_ imageURL:URL, type: CFString,_ compressionValue:Double = 0.9 ) -> Data?{
         // only jpeg, png is supported at the moment
         guard type == kUTTypeJPEG || type == kUTTypePNG || ( type == AVFileType.heic as CFString ) else { return nil }
         
@@ -88,11 +88,11 @@ extension NSImage {
         // always NSImage has .up
         dic[kCGImagePropertyOrientation as String] = CGImagePropertyOrientation.up
         if type == kUTTypeJPEG {
-            dic[kCGImageDestinationLossyCompressionQuality as String] = 0.9
+            dic[kCGImageDestinationLossyCompressionQuality as String] = compressionValue
         } else if type == kUTTypePNG {
             
         } else if type == AVFileType.heic as CFString {
-            dic[kCGImageDestinationLossyCompressionQuality as String] = 0.9
+            dic[kCGImageDestinationLossyCompressionQuality as String] = compressionValue
         }
         // note: pixel size info in metadata will be maintained automatically
         CGImageDestinationAddImage(cgImageDestination, cgImage, dic as CFDictionary)
@@ -101,8 +101,8 @@ extension NSImage {
         return destData as Data
     }
     
-    public func jpegDataWithMetadata(_ imageURL: URL) -> Data?{
-        return imageDataWithMetadata(imageURL, type: kUTTypeJPEG)
+    public func jpegDataWithMetadata(_ imageURL: URL,_ compressionValue:Double = 0.9) -> Data?{
+        return imageDataWithMetadata(imageURL, type: kUTTypeJPEG, compressionValue)
     }
     
     public func pngDataWithMetadata(_ imageURL: URL) -> Data? {
